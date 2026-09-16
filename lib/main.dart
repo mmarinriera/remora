@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+
 void main() {
   runApp(const MyApp());
 }
@@ -28,7 +30,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: .fromSeed(seedColor: Colors.teal),
       ),
       home: const MyHomePage(title: 'Remora'),
     );
@@ -54,7 +56,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final Stopwatch _stopwatch = Stopwatch();
+  late Duration _elapsedTime;
+  late String _elapsedTimeString;
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _elapsedTime = Duration.zero;
+    _elapsedTimeString = _formatElapsedTime(_elapsedTime);
+
+    // Create a timer that runs a callback every 100 milliseconds to update UI
+    timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
+      setState(() {
+        // Update elapsed time only if the stopwatch is running
+        if (_stopwatch.isRunning) {
+          _updateElapsedTime();
+        }
+      });
+    });
+  }
+
+  // Update elapsed time and formatted time string
+  void _updateElapsedTime() {
+    setState(() {
+      _elapsedTime = _stopwatch.elapsed;
+      _elapsedTimeString = _formatElapsedTime(_elapsedTime);
+    });
+  }
+
+  // Format a Duration into a string (MM:SS.SS)
+  String _formatElapsedTime(Duration time) {
+    return '${time.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(time.inSeconds.remainder(60)).toString().padLeft(2, '0')}.${(time.inMilliseconds % 1000 ~/ 100).toString()}';
+  }
 
   void _startTrack() {
     setState(() {
@@ -63,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      _stopwatch.start();
     });
   }
 
@@ -74,10 +110,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter=0;
+      _stopwatch.stop();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -116,14 +151,19 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: .center,
           children: [
-            const Text('You have pushed the button this many times:'),
+            const Text('Track time:'),
             Text(
-              '$_counter',
+              _elapsedTimeString,
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            FilledButton(onPressed: _startTrack, child: const Text('Start Track')),
-            FilledButton(onPressed: _stopTrack, child: const Text('Stop Track')),
-
+            FilledButton(
+              onPressed: _startTrack,
+              child: const Text('Start Track'),
+            ),
+            FilledButton(
+              onPressed: _stopTrack,
+              child: const Text('Stop Track'),
+            ),
           ],
         ),
       ),
