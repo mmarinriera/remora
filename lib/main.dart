@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final Stopwatch _stopwatch = Stopwatch();
   late Duration _elapsedTime;
   late String _elapsedTimeString;
-  late bool _track_active;
+  late bool _trackActive;
   late Timer timer;
 
   final LocationService _locationService = LocationService();
@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _elapsedTime = Duration.zero;
     _elapsedTimeString = _formatElapsedTime(_elapsedTime);
-    _track_active = false;
+    _trackActive = false;
 
     // Create a timer that runs a callback every 100 milliseconds to update UI
     timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.start();
-      _track_active = true;
+      _trackActive = true;
     });
 
     final permissionGranted = await _locationService.checkPermission();
@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.stop();
-      _track_active = false;
+      _trackActive = false;
     });
     await _locationSubscription?.cancel();
     _locationSubscription = null;
@@ -190,11 +190,11 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             FilledButton(
-              onPressed: !_track_active ? _startTrack : null,
+              onPressed: !_trackActive ? _startTrack : null,
               child: const Text('Start Track'),
             ),
             FilledButton(
-              onPressed: _track_active ? _stopTrack : null,
+              onPressed: _trackActive ? _stopTrack : null,
               child: const Text('Stop Track'),
             ),
           ],
