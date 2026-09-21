@@ -30,9 +30,7 @@ class RideTracker {
     _locationSubscription = _locationService.positionStream.listen((point) {
       _currentRide?.addPoint(point);
       _currentPosition = point;
-      print('lat: ${point.latitude}');
-      print('long: ${point.longitude}');
-      print('long: ${point.timestamp}');
+      print('point: $point');
     });
   }
 
