@@ -97,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _startTrack() async {
+    await _rideTracker.startTrack();
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -105,11 +106,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _stopwatch.start();
     });
-
-    await _rideTracker.startTrack();
   }
 
   Future<void> _stopTrack() async {
+    await _rideTracker.stopTrack();
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -118,7 +118,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _stopwatch.stop();
     });
-    await _rideTracker.stopTrack();
   }
 
   @override
