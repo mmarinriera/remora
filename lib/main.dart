@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late String _elapsedTimeString;
   late bool _trackActive;
   late Timer timer;
+  TrackPoint? _currentLocation;
 
   final LocationService _locationService = LocationService();
 
@@ -119,11 +120,17 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     _locationSubscription = _locationService.positionStream.listen((point) {
+      setState(() {
+        _stopwatch.start();
+        _currentLocation = point;
+      });
       final lat = point.latitude;
       final long = point.longitude;
+      final t = point.timestamp;
 
       print('lat: $lat');
       print('long: $long');
+      print('long: $t');
     });
   }
 
@@ -196,6 +203,12 @@ class _MyHomePageState extends State<MyHomePage> {
             FilledButton(
               onPressed: _trackActive ? _stopTrack : null,
               child: const Text('Stop Track'),
+            ),
+            const Text('Current position:'),
+            Text(
+              'Latitude: ${_currentLocation?.latitude ?? '-'}\n'
+              'Longitude: ${_currentLocation?.longitude ?? '-'}',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
         ),
