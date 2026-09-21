@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'dart:async';
 
+import 'models/track_point.dart';
+import 'services/location_service.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -59,7 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
   final Stopwatch _stopwatch = Stopwatch();
   late Duration _elapsedTime;
   late String _elapsedTimeString;
+  late bool _track_active;
   late Timer timer;
+
+  final LocationService _locationService = LocationService();
+
+  StreamSubscription<TrackPoint>? _locationSubscription;
 
   @override
   void initState() {
@@ -67,6 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _elapsedTime = Duration.zero;
     _elapsedTimeString = _formatElapsedTime(_elapsedTime);
+    _track_active = false;
 
     // Create a timer that runs a callback every 100 milliseconds to update UI
     timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
@@ -92,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return '${time.inMinutes.remainder(60).toString().padLeft(2, '0')}:${(time.inSeconds.remainder(60)).toString().padLeft(2, '0')}.${(time.inMilliseconds % 1000 ~/ 100).toString()}';
   }
 
-  void _startTrack() {
+  Future<void> _startTrack() async {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -100,10 +109,25 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.start();
+      _track_active = true;
+    });
+
+    final permissionGranted = await _locationService.checkPermission();
+
+    if (!permissionGranted) {
+      return;
+    }
+
+    _locationSubscription = _locationService.positionStream.listen((point) {
+      final lat = point.latitude;
+      final long = point.longitude;
+
+      print('lat: $lat');
+      print('long: $long');
     });
   }
 
-  void _stopTrack() {
+  Future<void> _stopTrack() async {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -111,7 +135,16 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.stop();
+      _track_active = false;
     });
+    await _locationSubscription?.cancel();
+    _locationSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -157,11 +190,11 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             FilledButton(
-              onPressed: _startTrack,
+              onPressed: !_track_active ? _startTrack : null,
               child: const Text('Start Track'),
             ),
             FilledButton(
-              onPressed: _stopTrack,
+              onPressed: _track_active ? _stopTrack : null,
               child: const Text('Stop Track'),
             ),
           ],
