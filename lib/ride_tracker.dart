@@ -49,4 +49,8 @@ class RideTracker {
     // TODO: save ride in storage.
     _currentRide = null;
   }
+
+  Future<void> dispose() async {
+    await stopTrack();
+  }
 }

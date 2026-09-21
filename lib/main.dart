@@ -65,8 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
   late Timer timer;
   final RideTracker _rideTracker = RideTracker();
 
-  StreamSubscription<TrackPoint>? _locationSubscription;
-
   @override
   void initState() {
     super.initState();
@@ -121,13 +119,11 @@ class _MyHomePageState extends State<MyHomePage> {
       _stopwatch.stop();
     });
     await _rideTracker.stopTrack();
-    await _locationSubscription?.cancel();
-    _locationSubscription = null;
   }
 
   @override
   void dispose() {
-    _locationSubscription?.cancel();
+    _rideTracker.dispose();
     super.dispose();
   }
 
