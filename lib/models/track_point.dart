@@ -16,4 +16,14 @@ class TrackPoint {
     this.heading,
     this.accuracy,
   });
+
+  @override
+  String toString() {
+    return 'TrackPoint('
+        'timestamp: $timestamp, '
+        'lat: $latitude, '
+        'long: $longitude, '
+        'acc: $accuracy'
+        ')';
+  }
 }

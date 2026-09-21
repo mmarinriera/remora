@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'models/track_point.dart';
-import 'services/location_service.dart';
+import 'ride_tracker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,11 +62,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final Stopwatch _stopwatch = Stopwatch();
   late Duration _elapsedTime;
   late String _elapsedTimeString;
-  late bool _trackActive;
   late Timer timer;
-  TrackPoint? _currentLocation;
-
-  final LocationService _locationService = LocationService();
+  final RideTracker _rideTracker = RideTracker();
 
   StreamSubscription<TrackPoint>? _locationSubscription;
 
@@ -76,7 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _elapsedTime = Duration.zero;
     _elapsedTimeString = _formatElapsedTime(_elapsedTime);
-    _trackActive = false;
 
     // Create a timer that runs a callback every 100 milliseconds to update UI
     timer = Timer.periodic(const Duration(milliseconds: 100), (Timer timer) {
@@ -110,28 +106,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.start();
-      _trackActive = true;
     });
 
-    final permissionGranted = await _locationService.checkPermission();
-
-    if (!permissionGranted) {
-      return;
-    }
-
-    _locationSubscription = _locationService.positionStream.listen((point) {
-      setState(() {
-        _stopwatch.start();
-        _currentLocation = point;
-      });
-      final lat = point.latitude;
-      final long = point.longitude;
-      final t = point.timestamp;
-
-      print('lat: $lat');
-      print('long: $long');
-      print('long: $t');
-    });
+    await _rideTracker.startTrack();
   }
 
   Future<void> _stopTrack() async {
@@ -142,8 +119,8 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _stopwatch.stop();
-      _trackActive = false;
     });
+    await _rideTracker.stopTrack();
     await _locationSubscription?.cancel();
     _locationSubscription = null;
   }
@@ -197,17 +174,17 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             FilledButton(
-              onPressed: !_trackActive ? _startTrack : null,
+              onPressed: !_rideTracker.trackActive ? _startTrack : null,
               child: const Text('Start Track'),
             ),
             FilledButton(
-              onPressed: _trackActive ? _stopTrack : null,
+              onPressed: _rideTracker.trackActive ? _stopTrack : null,
               child: const Text('Stop Track'),
             ),
             const Text('Current position:'),
             Text(
-              'Latitude: ${_currentLocation?.latitude ?? '-'}\n'
-              'Longitude: ${_currentLocation?.longitude ?? '-'}',
+              'Latitude: ${_rideTracker.currentPosition?.latitude ?? '-'}\n'
+              'Longitude: ${_rideTracker.currentPosition?.longitude ?? '-'}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
