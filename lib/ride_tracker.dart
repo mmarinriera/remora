@@ -7,12 +7,14 @@ import 'models/ride.dart';
 class RideTracker {
   final LocationService _locationService = LocationService();
   StreamSubscription<TrackPoint>? _locationSubscription;
-  late Ride? _currentRide;
-  TrackPoint? _currentPosition = null;
+  Ride? _currentRide;
+  TrackPoint? _currentPosition;
   bool _trackActive = false;
 
-  TrackPoint? get currentPosition => _currentPosition;
   bool get trackActive => _trackActive;
+  TrackPoint? get currentPosition => _currentPosition;
+  DateTime? get rideStart => _currentRide?.startedAt;
+  double? get rideDistance => _currentRide?.totalDistance();
 
   Future<void> startTrack() async {
     if (_trackActive) {

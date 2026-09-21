@@ -183,6 +183,12 @@ class _MyHomePageState extends State<MyHomePage> {
               'Longitude: ${_rideTracker.currentPosition?.longitude ?? '-'}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            const Text('Current ride:'),
+            Text(
+              'Started: ${_rideTracker.rideStart ?? '-'}\n'
+              'Distance: ${_rideTracker.rideDistance ?? '-'}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
       ),
