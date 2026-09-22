@@ -68,16 +68,13 @@ class SqliteRideRepository implements RideRepository {
     }
 
     return [
-      for (final {
-            'id': id as String,
-            'startedAt': startedAt as String,
-            'finishedAt': finishedAt as String,
-          }
-          in result)
+      for (final row in result)
         Ride(
-          id: id,
-          startedAt: DateTime.parse(startedAt),
-          finishedAt: DateTime.parse(finishedAt),
+          id: row['id'] as String,
+          startedAt: DateTime.parse(row['started_at'] as String),
+          finishedAt: row['finished_at'] == null
+              ? null
+              : DateTime.parse(row['finished_at'] as String),
         ),
     ];
   }
@@ -86,37 +83,26 @@ class SqliteRideRepository implements RideRepository {
   Future<List<TrackPoint>> getTrackPoints(String rideId) async {
     final db = await _database.database;
 
-    List<Map<String, Object?>> result = await db.query(
+    final result = await db.query(
       'track_points',
-      columns: ['rideId'],
-      where: 'rideId = ?',
+      where: 'ride_id = ?',
       whereArgs: [rideId],
+      orderBy: 'timestamp ASC',
     );
     if (result.isEmpty) {
       return [];
     }
 
     return [
-      for (final {
-            'id': _,
-            'ride_id': _,
-            'timestamp': timestamp as String,
-            'latitude': latitude as double,
-            'longitude': longitude as double,
-            'altitude': altitude as double,
-            'speed': speed as double,
-            'heading': heading as double,
-            'accuracy': accuracy as double,
-          }
-          in result)
+      for (final row in result)
         TrackPoint(
-          timestamp: DateTime.parse(timestamp),
-          latitude: latitude,
-          longitude: longitude,
-          altitude: altitude,
-          speed: speed,
-          heading: heading,
-          accuracy: accuracy,
+          timestamp: DateTime.parse(row['timestamp'] as String),
+          latitude: row['latitude'] as double,
+          longitude: row['longitude'] as double,
+          altitude: row['altitude'] as double?,
+          speed: row['speed'] as double?,
+          heading: row['heading'] as double?,
+          accuracy: row['accuracy'] as double?,
         ),
     ];
   }

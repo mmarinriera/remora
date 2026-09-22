@@ -1,13 +1,19 @@
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const _databaseName = 'rides.db';
   static const _databaseVersion = 1;
 
-  Database? _database;
+  final sqflite.DatabaseFactory _databaseFactory;
+  final String? _path;
 
-  Future<Database> get database async {
+  sqflite.Database? _database;
+
+  AppDatabase({sqflite.DatabaseFactory? databaseFactory, this._path})
+    : _databaseFactory = databaseFactory ?? sqflite.databaseFactory;
+
+  Future<sqflite.Database> get database async {
     if (_database != null) {
       return _database!;
     }
@@ -16,17 +22,20 @@ class AppDatabase {
     return _database!;
   }
 
-  Future<Database> _openDatabase() async {
-    final databasePath = await getDatabasesPath();
+  Future<sqflite.Database> _openDatabase() async {
+    final path =
+        _path ?? join(await _databaseFactory.getDatabasesPath(), _databaseName);
 
-    return openDatabase(
-      join(databasePath, _databaseName),
-      version: _databaseVersion,
-      onCreate: _createDatabase,
+    return _databaseFactory.openDatabase(
+      path,
+      options: sqflite.OpenDatabaseOptions(
+        version: _databaseVersion,
+        onCreate: _createDatabase,
+      ),
     );
   }
 
-  Future<void> _createDatabase(Database db, int version) async {
+  Future<void> _createDatabase(sqflite.Database db, int version) async {
     await db.execute('''
       CREATE TABLE rides (
         id TEXT PRIMARY KEY,
@@ -49,5 +58,15 @@ class AppDatabase {
         FOREIGN KEY (ride_id) REFERENCES rides(id)
       )
     ''');
+
+    await db.execute('''
+      CREATE INDEX idx_track_points_ride_id
+      ON track_points(ride_id)
+    ''');
+  }
+
+  Future<void> close() async {
+    await _database?.close();
+    _database = null;
   }
 }
