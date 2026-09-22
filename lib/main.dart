@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'dart:async';
 
-import 'models/track_point.dart';
 import 'ride_tracker.dart';
 
 void main() {
