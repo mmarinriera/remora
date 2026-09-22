@@ -3,7 +3,7 @@ class Ride {
   final DateTime startedAt;
   DateTime? finishedAt;
 
-  Ride({required this.id, required this.startedAt});
+  Ride({required this.id, required this.startedAt, this.finishedAt});
 
   @override
   String toString() {

@@ -9,9 +9,9 @@ abstract interface class RideRepository {
 
   Future<void> finishRide(String rideId, DateTime finishedAt);
 
-  // Future<List<Ride>> getRides();
+  Future<List<Ride>> getRides();
 
-  // Future<List<TrackPoint>> getTrackPoints(String rideId);
+  Future<List<TrackPoint>> getTrackPoints(String rideId);
 }
 
 class SqliteRideRepository implements RideRepository {
@@ -56,5 +56,68 @@ class SqliteRideRepository implements RideRepository {
       where: 'id = ?',
       whereArgs: [rideId],
     );
+  }
+
+  @override
+  Future<List<Ride>> getRides() async {
+    final db = await _database.database;
+    List<Map<String, Object?>> result = await db.query('rides');
+
+    if (result.isEmpty) {
+      return [];
+    }
+
+    return [
+      for (final {
+            'id': id as String,
+            'startedAt': startedAt as String,
+            'finishedAt': finishedAt as String,
+          }
+          in result)
+        Ride(
+          id: id,
+          startedAt: DateTime.parse(startedAt),
+          finishedAt: DateTime.parse(finishedAt),
+        ),
+    ];
+  }
+
+  @override
+  Future<List<TrackPoint>> getTrackPoints(String rideId) async {
+    final db = await _database.database;
+
+    List<Map<String, Object?>> result = await db.query(
+      'track_points',
+      columns: ['rideId'],
+      where: 'rideId = ?',
+      whereArgs: [rideId],
+    );
+    if (result.isEmpty) {
+      return [];
+    }
+
+    return [
+      for (final {
+            'id': _,
+            'ride_id': _,
+            'timestamp': timestamp as String,
+            'latitude': latitude as double,
+            'longitude': longitude as double,
+            'altitude': altitude as double,
+            'speed': speed as double,
+            'heading': heading as double,
+            'accuracy': accuracy as double,
+          }
+          in result)
+        TrackPoint(
+          timestamp: DateTime.parse(timestamp),
+          latitude: latitude,
+          longitude: longitude,
+          altitude: altitude,
+          speed: speed,
+          heading: heading,
+          accuracy: accuracy,
+        ),
+    ];
   }
 }
