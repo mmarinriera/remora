@@ -56,4 +56,13 @@ class LocationService {
 
     return true;
   }
+
+  double distanceBetweenPoints(TrackPoint point1, TrackPoint point2) {
+    return Geolocator.distanceBetween(
+      point1.latitude,
+      point1.longitude,
+      point2.latitude,
+      point2.longitude,
+    );
+  }
 }

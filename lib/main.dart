@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:remora/database/database.dart';
 
 import 'dart:async';
 
 import 'ride_tracker.dart';
+import 'services/location_service.dart';
+import 'repositories/ride_repository.dart';
 
 void main() {
   runApp(const RemoraApp());
@@ -36,7 +39,10 @@ class _MainPageState extends State<MainPage> {
   late Duration _elapsedTime;
   late String _elapsedTimeString;
   late Timer timer;
-  final RideTracker _rideTracker = RideTracker();
+  final RideTracker _rideTracker = RideTracker(
+    LocationService(),
+    SqliteRideRepository(AppDatabase()),
+  );
 
   @override
   void initState() {
@@ -121,8 +127,8 @@ class _MainPageState extends State<MainPage> {
             ),
             const Text('Current ride:'),
             Text(
-              'Started: ${_rideTracker.rideStart ?? '-'}\n'
-              'Distance: ${_rideTracker.rideDistance ?? '-'}',
+              'Started: ${_rideTracker.currentRideStart ?? '-'}\n'
+              'Distance: ${_rideTracker.currentRideDistance ?? '-'}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ],
