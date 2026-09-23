@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remora/database/database.dart';
+import 'package:remora/models/ride.dart';
 
 import 'dart:async';
 
@@ -43,6 +44,7 @@ class _MainPageState extends State<MainPage> {
     LocationService(),
     SqliteRideRepository(AppDatabase()),
   );
+  late List<Ride> _ridesList = [];
 
   @override
   void initState() {
@@ -60,6 +62,14 @@ class _MainPageState extends State<MainPage> {
         }
       });
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateRides();
+    });
+  }
+
+  Future<void> _updateRides() async {
+    _ridesList = await _rideTracker.getRides();
   }
 
   // Update elapsed time and formatted time string
@@ -84,6 +94,7 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> _stopTrack() async {
     await _rideTracker.stopTrack();
+    await _updateRides();
     setState(() {
       _stopwatch.stop();
     });
@@ -131,6 +142,8 @@ class _MainPageState extends State<MainPage> {
               'Distance: ${_rideTracker.currentRideDistance ?? '-'}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+            Text("Past rides: ${_ridesList.length}"),
+            for (Ride ride in _ridesList) Text('Ride from ${ride.startedAt}'),
           ],
         ),
       ),

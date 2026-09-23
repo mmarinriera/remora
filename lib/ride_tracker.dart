@@ -73,6 +73,10 @@ class RideTracker {
     await stopTrack();
   }
 
+  Future<List<Ride>> getRides() async {
+    return await _repository.getRides();
+  }
+
   void _updateCurrentRideData(TrackPoint point) {
     final TrackPoint? currentPosition = _currentPosition;
     final double? distance = _currentRideDistance;
