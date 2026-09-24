@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:remora/database/database.dart';
 import 'package:remora/models/ride.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'dart:async';
 
@@ -65,6 +67,7 @@ class _MainPageState extends State<MainPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateRides();
+      initializeDateFormatting('de_DE', null);
     });
   }
 
@@ -78,6 +81,10 @@ class _MainPageState extends State<MainPage> {
       _elapsedTime = _stopwatch.elapsed;
       _elapsedTimeString = _formatElapsedTime(_elapsedTime);
     });
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat.yMMMEd().add_jm().format(date);
   }
 
   // Format a Duration into a string (MM:SS.SS)
@@ -143,7 +150,8 @@ class _MainPageState extends State<MainPage> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             Text("Past rides: ${_ridesList.length}"),
-            for (Ride ride in _ridesList) Text('Ride from ${ride.startedAt}'),
+            for (Ride ride in _ridesList)
+              Text('Ride from ${_formatDate(ride.startedAt)}'),
           ],
         ),
       ),
