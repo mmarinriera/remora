@@ -149,9 +149,25 @@ class _MainPageState extends State<MainPage> {
               'Distance: ${_rideTracker.currentRideDistance ?? '-'}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            Text("Past rides: ${_ridesList.length}"),
-            for (Ride ride in _ridesList)
-              Text('Ride from ${_formatDate(ride.startedAt)}'),
+            Text("Past rides: ${_ridesList.length}", textAlign: TextAlign.left),
+            SizedBox(
+              height: 300,
+              child: ListView(
+                padding: const EdgeInsets.all(8),
+                children: [
+                  for (Ride ride in _ridesList)
+                    Container(
+                      height: 50,
+                      color: Colors.amber[600],
+                      child: Center(
+                        child: Text(
+                          'Ride from ${_formatDate(ride.startedAt)}. Distance ?',
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
