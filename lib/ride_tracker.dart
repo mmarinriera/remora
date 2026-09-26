@@ -62,9 +62,14 @@ class RideTracker {
     _locationSubscription = null;
 
     final rideId = _currentRideId;
+    final totalDistance = _currentRideDistance;
 
     if (rideId != null) {
-      await _repository.finishRide(rideId, DateTime.now());
+      await _repository.finishRide(
+        rideId,
+        DateTime.now(),
+        totalDistance ?? 0.0,
+      );
     }
     _resetCurrentRideData();
   }

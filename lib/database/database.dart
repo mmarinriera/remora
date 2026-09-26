@@ -40,7 +40,8 @@ class AppDatabase {
       CREATE TABLE rides (
         id TEXT PRIMARY KEY,
         started_at TEXT NOT NULL,
-        finished_at TEXT
+        finished_at TEXT,
+        total_distance REAL
       )
     ''');
 
@@ -68,5 +69,17 @@ class AppDatabase {
   Future<void> close() async {
     await _database?.close();
     _database = null;
+  }
+
+  Future<void> deleteDatabase() async {
+    await _database?.close();
+    _database = null;
+
+    final path =
+        _path ?? join(await _databaseFactory.getDatabasesPath(), _databaseName);
+
+    print('db path: $path');
+
+    await _databaseFactory.deleteDatabase(path);
   }
 }

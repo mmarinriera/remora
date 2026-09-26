@@ -7,11 +7,17 @@ abstract interface class RideRepository {
 
   Future<void> addTrackPoint(String rideId, TrackPoint point);
 
-  Future<void> finishRide(String rideId, DateTime finishedAt);
+  Future<void> finishRide(
+    String rideId,
+    DateTime finishedAt,
+    double totalDistance,
+  );
 
   Future<List<Ride>> getRides();
 
   Future<List<TrackPoint>> getTrackPoints(String rideId);
+
+  Future<void> clearDataBase();
 }
 
 class SqliteRideRepository implements RideRepository {
@@ -27,6 +33,7 @@ class SqliteRideRepository implements RideRepository {
       'id': ride.id,
       'started_at': ride.startedAt.toIso8601String(),
       'finished_at': ride.finishedAt?.toIso8601String(),
+      'total_distance': ride.totalDistance,
     });
   }
 
@@ -47,12 +54,19 @@ class SqliteRideRepository implements RideRepository {
   }
 
   @override
-  Future<void> finishRide(String rideId, DateTime finishedAt) async {
+  Future<void> finishRide(
+    String rideId,
+    DateTime finishedAt,
+    double totalDistance,
+  ) async {
     final db = await _database.database;
 
     await db.update(
       'rides',
-      {'finished_at': finishedAt.toIso8601String()},
+      {
+        'finished_at': finishedAt.toIso8601String(),
+        'total_distance': totalDistance,
+      },
       where: 'id = ?',
       whereArgs: [rideId],
     );
@@ -75,6 +89,7 @@ class SqliteRideRepository implements RideRepository {
           finishedAt: row['finished_at'] == null
               ? null
               : DateTime.parse(row['finished_at'] as String),
+          totalDistance: row['total_distance'] as double,
         ),
     ];
   }
@@ -105,5 +120,10 @@ class SqliteRideRepository implements RideRepository {
           accuracy: row['accuracy'] as double?,
         ),
     ];
+  }
+
+  @override
+  Future<void> clearDataBase() async {
+    await _database.deleteDatabase();
   }
 }

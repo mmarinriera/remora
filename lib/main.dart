@@ -161,7 +161,7 @@ class _MainPageState extends State<MainPage> {
                       color: Colors.amber[600],
                       child: Center(
                         child: Text(
-                          'Ride from ${_formatDate(ride.startedAt)}. Distance ?',
+                          'Ride from ${_formatDate(ride.startedAt)}. Distance ${ride.totalDistance}',
                         ),
                       ),
                     ),
