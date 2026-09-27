@@ -6,10 +6,12 @@ import 'services/location_service.dart';
 import 'models/track_point.dart';
 import 'models/ride.dart';
 import 'repositories/ride_repository.dart';
+import 'services/permission_service.dart';
 
 class RideTracker {
   final LocationService _locationService;
   final RideRepository _repository;
+  final PermissionService _permissionService = PermissionService();
 
   StreamSubscription<TrackPoint>? _locationSubscription;
 
@@ -31,6 +33,8 @@ class RideTracker {
       return;
     }
     _trackActive = true;
+
+    await _permissionService.requestNotificationPermission(); //TODO: show a dialog if permission is denied.
 
     final permissionGranted = await _locationService.checkPermission();
     if (!permissionGranted) {

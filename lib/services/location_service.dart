@@ -9,7 +9,8 @@ class LocationService {
       foregroundNotificationConfig: ForegroundNotificationConfig(
         notificationTitle: 'Ride tracking',
         notificationText: 'Your ride is being recorded',
-        enableWakeLock: true,
+        enableWakeLock: false,
+        setOngoing: true,
       ),
     );
 
