@@ -1,20 +1,30 @@
 import 'dart:async';
 
+import 'package:uuid/uuid.dart';
+
 import 'services/location_service.dart';
 import 'models/track_point.dart';
 import 'models/ride.dart';
+import 'repositories/ride_repository.dart';
 
 class RideTracker {
-  final LocationService _locationService = LocationService();
+  final LocationService _locationService;
+  final RideRepository _repository;
+
   StreamSubscription<TrackPoint>? _locationSubscription;
-  Ride? _currentRide;
+
+  String? _currentRideId;
+  DateTime? _currentRideStart;
+  double? _currentRideDistance;
   TrackPoint? _currentPosition;
   bool _trackActive = false;
 
-  bool get trackActive => _trackActive;
+  DateTime? get currentRideStart => _currentRideStart;
+  double? get currentRideDistance => _currentRideDistance;
   TrackPoint? get currentPosition => _currentPosition;
-  DateTime? get rideStart => _currentRide?.startedAt;
-  double? get rideDistance => _currentRide?.totalDistance();
+  bool get trackActive => _trackActive;
+
+  RideTracker(this._locationService, this._repository);
 
   Future<void> startTrack() async {
     if (_trackActive) {
@@ -27,12 +37,18 @@ class RideTracker {
       return;
     }
 
-    _currentRide = Ride(id: 'new_ride', startedAt: DateTime.now());
+    final ride = Ride(id: const Uuid().v4(), startedAt: DateTime.now());
+    _currentRideId = ride.id;
+    _currentRideStart = ride.startedAt;
+    _currentRideDistance = 0.0;
 
-    _locationSubscription = _locationService.positionStream.listen((point) {
-      _currentRide?.addPoint(point);
-      _currentPosition = point;
-      print('point: $point');
+    await _repository.createRide(ride);
+
+    _locationSubscription = _locationService.positionStream.listen((
+      point,
+    ) async {
+      _updateCurrentRideData(point);
+      await _handleTrackPoint(point);
     });
   }
 
@@ -45,14 +61,55 @@ class RideTracker {
     await _locationSubscription?.cancel();
     _locationSubscription = null;
 
-    _currentRide?.finishedAt = DateTime.now();
+    final rideId = _currentRideId;
+    final totalDistance = _currentRideDistance;
 
-    print('Ride finished: $_currentRide');
-    // TODO: save ride in storage.
-    _currentRide = null;
+    if (rideId != null) {
+      await _repository.finishRide(
+        rideId,
+        DateTime.now(),
+        totalDistance ?? 0.0,
+      );
+    }
+    _resetCurrentRideData();
   }
 
   Future<void> dispose() async {
     await stopTrack();
+  }
+
+  Future<List<Ride>> getRides() async {
+    return await _repository.getRides();
+  }
+
+  void _updateCurrentRideData(TrackPoint point) {
+    final TrackPoint? currentPosition = _currentPosition;
+    final double? distance = _currentRideDistance;
+
+    if (currentPosition == null || distance == null) {
+      _currentRideDistance = 0.0;
+    } else {
+      _currentRideDistance =
+          distance +
+          _locationService.distanceBetweenPoints(currentPosition, point);
+    }
+
+    _currentPosition = point;
+    print('point: $point');
+  }
+
+  Future<void> _handleTrackPoint(TrackPoint point) async {
+    final rideId = _currentRideId;
+    if (rideId == null) {
+      return;
+    }
+    await _repository.addTrackPoint(rideId, point);
+  }
+
+  void _resetCurrentRideData() {
+    _currentRideId = null;
+    _currentRideStart = null;
+    _currentRideDistance = null;
+    _currentPosition = null;
   }
 }
