@@ -89,7 +89,7 @@ class SqliteRideRepository implements RideRepository {
           finishedAt: row['finished_at'] == null
               ? null
               : DateTime.parse(row['finished_at'] as String),
-          totalDistance: row['total_distance'] as double,
+          totalDistance: row['total_distance'] as double?,
         ),
     ];
   }
