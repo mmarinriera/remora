@@ -33,7 +33,8 @@ void main() {
       await repository.addTrackPoint(ride.id, point);
 
       final finishTime = DateTime.now();
-      await repository.finishRide(ride.id, finishTime);
+      final totalDistance = 50.0;
+      await repository.finishRide(ride.id, finishTime, totalDistance);
 
       final storedRides = await repository.getRides();
       final points = await repository.getTrackPoints(ride.id);
@@ -41,6 +42,7 @@ void main() {
       expect(storedRides.length, 1);
       expect(storedRides[0].startedAt, ride.startedAt);
       expect(storedRides[0].finishedAt, finishTime);
+      expect(storedRides[0].totalDistance, totalDistance);
 
       expect(points.length, 1);
       expect(points[0].timestamp, point.timestamp);
