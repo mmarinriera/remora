@@ -3,12 +3,14 @@ import 'package:remora/database/database.dart';
 import 'package:remora/models/ride.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:remora/models/track_point.dart';
 
 import 'dart:async';
 
 import 'ride_tracker.dart';
 import 'services/location_service.dart';
 import 'repositories/ride_repository.dart';
+import 'ride_map.dart';
 
 void main() {
   runApp(const RemoraApp());
@@ -152,22 +154,50 @@ class _MainPageState extends State<MainPage> {
             Text("Past rides: ${_ridesList.length}", textAlign: TextAlign.left),
             SizedBox(
               height: 300,
-              child: ListView(
-                padding: const EdgeInsets.all(8),
-                children: [
-                  for (Ride ride in _ridesList)
-                    Container(
-                      height: 50,
-                      color: Colors.amber[600],
-                      child: Center(
-                        child: Text(
-                          'Ride from ${_formatDate(ride.startedAt)}. Distance ${ride.totalDistance}',
-                        ),
-                      ),
-                    ),
+              child: RideMap(
+                points: [
+                  TrackPoint(
+                    timestamp: DateTime.now(),
+                    latitude: 48.137,
+                    longitude: 11.575,
+                  ),
+                  TrackPoint(
+                    timestamp: DateTime.now(),
+                    latitude: 48.138,
+                    longitude: 11.574,
+                  ),
+                  TrackPoint(
+                    timestamp: DateTime.now(),
+                    latitude: 48.139,
+                    longitude: 11.572,
+                  ),
+                  TrackPoint(
+                    timestamp: DateTime.now(),
+                    latitude: 48.142,
+                    longitude: 11.571,
+                  ),
                 ],
               ),
             ),
+
+            // SizedBox(
+            //   height: 300,
+            //   child: ListView(
+            //     padding: const EdgeInsets.all(8),
+            //     children: [
+            //       for (Ride ride in _ridesList)
+            //         Container(
+            //           height: 50,
+            //           color: Colors.amber[600],
+            //           child: Center(
+            //             child: Text(
+            //               'Ride from ${_formatDate(ride.startedAt)}. Distance ${ride.totalDistance}',
+            //             ),
+            //           ),
+            //         ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
