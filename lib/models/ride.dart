@@ -4,6 +4,8 @@ class Ride {
   DateTime? finishedAt;
   double? totalDistance;
 
+  Duration? get duration => finishedAt?.difference(startedAt);
+
   Ride({
     required this.id,
     required this.startedAt,
