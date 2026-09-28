@@ -3,9 +3,15 @@ import 'package:remora/models/track_point.dart';
 
 class LocationService {
   Stream<TrackPoint> get positionStream {
-    const settings = LocationSettings(
+    final settings = AndroidSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 5,
+      foregroundNotificationConfig: ForegroundNotificationConfig(
+        notificationTitle: 'Ride tracking',
+        notificationText: 'Your ride is being recorded',
+        enableWakeLock: false,
+        setOngoing: true,
+      ),
     );
 
     return Geolocator.getPositionStream(locationSettings: settings).map(

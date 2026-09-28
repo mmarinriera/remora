@@ -39,6 +39,7 @@ dependencies:
   path: ^1.9.1
   uuid: ^4.6.0
   intl: ^0.20.3
+  permission_handler: ^13.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
