@@ -7,10 +7,10 @@ import 'package:remora/models/track_point.dart';
 
 import 'dart:async';
 
-import 'ride_tracker.dart';
+import 'services/ride_tracker.dart';
 import 'services/location_service.dart';
 import 'repositories/ride_repository.dart';
-import 'ride_map.dart';
+import 'widgets/ride_map.dart';
 
 void main() {
   runApp(const RemoraApp());

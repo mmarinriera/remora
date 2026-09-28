@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:uuid/uuid.dart';
 
-import 'services/location_service.dart';
-import 'models/track_point.dart';
-import 'models/ride.dart';
-import 'repositories/ride_repository.dart';
-import 'services/permission_service.dart';
+import 'location_service.dart';
+import '../models/track_point.dart';
+import '../models/ride.dart';
+import '../repositories/ride_repository.dart';
+import 'permission_service.dart';
 
 class RideTracker {
   final LocationService _locationService;
