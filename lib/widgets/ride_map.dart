@@ -6,11 +6,12 @@ import 'package:latlong2/latlong.dart';
 import 'dart:math';
 
 class RideMap extends StatelessWidget {
-  final List<TrackPoint> points;
+  final List<TrackPoint> _points;
+  final TrackPoint? _centerPoint;
 
-  const RideMap({super.key, required this.points});
+  const RideMap({super.key, required this._points, this._centerPoint});
 
-  LatLng _centerPoint(List<TrackPoint> points) {
+  LatLng _averageCenterPoint(List<TrackPoint> points) {
     if (points.isEmpty) {
       return LatLng(0.0, 0.0);
     }
@@ -41,12 +42,12 @@ class RideMap extends StatelessWidget {
       ),
     ];
 
-    if (points.length > 1) {
+    if (_points.length > 1) {
       layers.add(
         PolylineLayer(
           polylines: [
             Polyline(
-              points: points
+              points: _points
                   .map((p) => LatLng(p.latitude, p.longitude))
                   .toList(),
               strokeWidth: 4,
@@ -56,15 +57,17 @@ class RideMap extends StatelessWidget {
       );
     }
 
+    final LatLng mapCenter = _centerPoint == null
+        ? _averageCenterPoint(_points)
+        : LatLng(_centerPoint.latitude, _centerPoint.longitude);
+
     return FlutterMap(
       options: MapOptions(
-        initialCenter: points.length > 1
-            ? _centerPoint(points)
-            : LatLng(48.137, 11.575),
+        initialCenter: mapCenter,
         initialZoom: 13,
-        initialCameraFit: points.length > 1
+        initialCameraFit: _points.length > 1
             ? CameraFit.bounds(
-                bounds: _trackBounds(points),
+                bounds: _trackBounds(_points),
                 padding: EdgeInsets.all(40),
               )
             : null,

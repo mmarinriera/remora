@@ -19,11 +19,14 @@ class RideTracker {
   DateTime? _currentRideStart;
   double? _currentRideDistance;
   TrackPoint? _currentPosition;
+  final List<TrackPoint> _currentRidePoints = [];
   bool _trackActive = false;
 
   DateTime? get currentRideStart => _currentRideStart;
   double? get currentRideDistance => _currentRideDistance;
   TrackPoint? get currentPosition => _currentPosition;
+  List<TrackPoint> get currentRidePoints => _currentRidePoints;
+
   bool get trackActive => _trackActive;
 
   RideTracker(this._locationService, this._repository);
@@ -99,6 +102,7 @@ class RideTracker {
     }
 
     _currentPosition = point;
+    _currentRidePoints.add(point);
     print('point: $point');
   }
 
@@ -115,5 +119,6 @@ class RideTracker {
     _currentRideStart = null;
     _currentRideDistance = null;
     _currentPosition = null;
+    _currentRidePoints.clear();
   }
 }

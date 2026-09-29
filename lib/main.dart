@@ -16,7 +16,7 @@ void main() {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => AppState(repository, tracker),
+      create: (_) => AppState(tracker),
       child: const RemoraApp(),
     ),
   );

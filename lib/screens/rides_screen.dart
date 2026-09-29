@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:remora/app/app_state.dart';
 import 'package:remora/models/ride.dart';
 import 'package:remora/models/track_point.dart';
+import 'package:remora/screens/active_ride_screen.dart';
 import 'package:remora/screens/ride_details_screen.dart';
 import 'package:remora/utils.dart';
 
@@ -86,6 +87,21 @@ class RidesScreen extends StatelessWidget {
           );
         },
         separatorBuilder: (context, index) => const Divider(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          context.read<AppState>().startRide();
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => ActiveRideScreen(title: "Ride"),
+            ),
+          );
+        },
+        // foregroundColor: customizations[index].$1,
+        // backgroundColor: customizations[index].$2,
+        // shape: customizations[index].$3,
+        child: const Icon(Icons.navigation),
       ),
     );
   }
