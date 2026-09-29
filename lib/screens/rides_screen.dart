@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:remora/app/app_state.dart';
+import 'package:remora/app/ride_tracker.dart';
 import 'package:remora/models/ride.dart';
 import 'package:remora/models/track_point.dart';
 import 'package:remora/screens/active_ride_screen.dart';
@@ -46,7 +46,7 @@ class RidesScreen extends StatelessWidget {
             ),
             onTap: () async {
               // final points = await context
-              //     .read<AppState>()
+              //     .read<RideTracker>()
               //     .repository
               //     .getTrackPoints(ride.id);
 
@@ -90,7 +90,8 @@ class RidesScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          context.read<AppState>().startRide();
+          await context.read<RideTracker>().startTrack();
+          if (!context.mounted) return;
           Navigator.push(
             context,
             MaterialPageRoute<void>(

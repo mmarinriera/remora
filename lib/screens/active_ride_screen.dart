@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:remora/models/ride.dart';
+import 'package:remora/app/ride_tracker.dart';
 import 'package:remora/models/track_point.dart';
 import 'package:remora/utils.dart';
 import 'package:remora/widgets/ride_map.dart';
 import 'package:provider/provider.dart';
-import 'package:remora/app/app_state.dart';
 
 class ActiveRideScreen extends StatelessWidget {
   final String title;
@@ -12,23 +11,17 @@ class ActiveRideScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? rideStart = context
-        .watch<AppState>()
-        .tracker
-        .currentRideStart;
+    final DateTime? rideStart = context.watch<RideTracker>().currentRideStart;
     final TrackPoint? currentPosition = context
-        .watch<AppState>()
-        .tracker
+        .watch<RideTracker>()
         .currentPosition;
 
     final double? currentDistance = context
-        .watch<AppState>()
-        .tracker
+        .watch<RideTracker>()
         .currentRideDistance;
 
     final List<TrackPoint> trackPoints = context
-        .watch<AppState>()
-        .tracker
+        .watch<RideTracker>()
         .currentRidePoints;
 
     final String rideStartFmt = rideStart != null ? formatDate(rideStart) : '-';
@@ -51,7 +44,8 @@ class ActiveRideScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          context.read<AppState>().stopRide();
+          await context.read<RideTracker>().stopTrack();
+          if (!context.mounted) return;
           Navigator.pop(context);
         },
         // foregroundColor: customizations[index].$1,

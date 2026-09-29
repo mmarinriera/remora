@@ -1,14 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-import 'location_service.dart';
+import '../services/location_service.dart';
 import '../models/track_point.dart';
 import '../models/ride.dart';
 import '../repositories/ride_repository.dart';
-import 'permission_service.dart';
+import '../services/permission_service.dart';
 
-class RideTracker {
+// App state class
+class RideTracker extends ChangeNotifier {
   final LocationService _locationService;
   final RideRepository _repository;
   final PermissionService _permissionService = PermissionService();
@@ -50,12 +52,14 @@ class RideTracker {
     _currentRideDistance = 0.0;
 
     await _repository.createRide(ride);
+    notifyListeners();
 
     _locationSubscription = _locationService.positionStream.listen((
       point,
     ) async {
       _updateCurrentRideData(point);
       await _handleTrackPoint(point);
+      notifyListeners();
     });
   }
 
@@ -79,10 +83,7 @@ class RideTracker {
       );
     }
     _resetCurrentRideData();
-  }
-
-  Future<void> dispose() async {
-    await stopTrack();
+    notifyListeners();
   }
 
   Future<List<Ride>> getRides() async {
@@ -120,5 +121,12 @@ class RideTracker {
     _currentRideDistance = null;
     _currentPosition = null;
     _currentRidePoints.clear();
+  }
+
+  @override
+  Future<void> dispose() async {
+    await stopTrack();
+    notifyListeners();
+    super.dispose();
   }
 }
