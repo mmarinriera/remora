@@ -14,7 +14,11 @@ void main() {
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => RideTracker(locationService, repository),
+      create: (_) {
+        final tracker = RideTracker(locationService, repository);
+        tracker.initialize();
+        return tracker;
+      },
       child: const RemoraApp(),
     ),
   );

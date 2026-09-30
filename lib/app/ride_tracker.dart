@@ -17,22 +17,27 @@ class RideTracker extends ChangeNotifier {
 
   StreamSubscription<TrackPoint>? _locationSubscription;
 
-  String? _currentRideId;
-  DateTime? _currentRideStart;
-  double? _currentRideDistance;
-  TrackPoint? _currentPosition;
+  Ride? _currentRide;
   final List<TrackPoint> _currentRidePoints = [];
+  List<Ride> _pastRides = [];
   bool _trackActive = false;
 
-  DateTime? get currentRideStart => _currentRideStart;
-  double? get currentRideDistance => _currentRideDistance;
-  TrackPoint? get currentPosition => _currentPosition;
+  DateTime? get currentRideStart => _currentRide?.startedAt;
+  double? get currentRideDistance => _currentRide?.totalDistance;
+  TrackPoint? get currentPosition => _currentRidePoints.lastOrNull;
   List<TrackPoint> get currentRidePoints =>
       List.unmodifiable(_currentRidePoints);
+
+  List<Ride> get pastRides => List.unmodifiable(_pastRides);
 
   bool get trackActive => _trackActive;
 
   RideTracker(this._locationService, this._repository);
+
+  Future<void> initialize() async {
+    _pastRides = await _repository.getRides();
+    notifyListeners();
+  }
 
   Future<void> startTrack() async {
     if (_trackActive) {
@@ -47,12 +52,10 @@ class RideTracker extends ChangeNotifier {
       return;
     }
 
-    final ride = Ride(id: const Uuid().v4(), startedAt: DateTime.now());
-    _currentRideId = ride.id;
-    _currentRideStart = ride.startedAt;
-    _currentRideDistance = 0.0;
+    final currentRide = Ride(id: const Uuid().v4(), startedAt: DateTime.now());
 
-    await _repository.createRide(ride);
+    await _repository.createRide(currentRide);
+    _currentRide = currentRide;
 
     _locationSubscription = _locationService.positionStream.listen((
       point,
@@ -74,15 +77,16 @@ class RideTracker extends ChangeNotifier {
     await _locationSubscription?.cancel();
     _locationSubscription = null;
 
-    final rideId = _currentRideId;
-    final totalDistance = _currentRideDistance;
-
-    if (rideId != null) {
+    final Ride? currentRide = _currentRide;
+    final DateTime finishTime = DateTime.now();
+    if (currentRide != null) {
+      currentRide.finishedAt = finishTime;
       await _repository.finishRide(
-        rideId,
-        DateTime.now(),
-        totalDistance ?? 0.0,
+        currentRide.id,
+        finishTime,
+        currentRide.totalDistance ?? 0.0,
       );
+      _pastRides.add(currentRide);
     }
     _resetCurrentRideData();
     notifyListeners();
@@ -92,36 +96,39 @@ class RideTracker extends ChangeNotifier {
     return await _repository.getRides();
   }
 
-  void _updateCurrentRideData(TrackPoint point) {
-    final TrackPoint? currentPosition = _currentPosition;
-    final double? distance = _currentRideDistance;
+  Future<List<TrackPoint>> getTrackPoints(String rideId) async {
+    return await _repository.getTrackPoints(rideId);
+  }
 
-    if (currentPosition == null || distance == null) {
-      _currentRideDistance = 0.0;
-    } else {
-      _currentRideDistance =
+  void _updateCurrentRideData(TrackPoint point) {
+    final TrackPoint? lastTrackPoint = _currentRidePoints.lastOrNull;
+    final Ride? currentRide = _currentRide;
+
+    if (currentRide == null) return;
+
+    final double? distance = currentRide.totalDistance;
+    if (distance != null && lastTrackPoint != null) {
+      currentRide.totalDistance =
           distance +
-          _locationService.distanceBetweenPoints(currentPosition, point);
+          _locationService.distanceBetweenPoints(lastTrackPoint, point);
+    } else {
+      currentRide.totalDistance = 0.0;
     }
 
-    _currentPosition = point;
     _currentRidePoints.add(point);
     print('point: $point');
   }
 
   Future<void> _handleTrackPoint(TrackPoint point) async {
-    final rideId = _currentRideId;
-    if (rideId == null) {
+    final currentRide = _currentRide;
+    if (currentRide == null) {
       return;
     }
-    await _repository.addTrackPoint(rideId, point);
+    await _repository.addTrackPoint(currentRide.id, point);
   }
 
   void _resetCurrentRideData() {
-    _currentRideId = null;
-    _currentRideStart = null;
-    _currentRideDistance = null;
-    _currentPosition = null;
+    _currentRide = null;
     _currentRidePoints.clear();
   }
 
