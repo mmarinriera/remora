@@ -41,23 +41,6 @@ class _RideMapState extends State<RideMap> {
     return LatLng(sumLat / points.length, sumLong / points.length);
   }
 
-  LatLng _getInitialMapCenter(List<TrackPoint> points) {
-    if (points.isEmpty) return LatLng(0.0, 0.0);
-
-    if (widget.showFullRide) return _averageCenterPoint(widget.points);
-
-    return LatLng(points[0].latitude, points[0].longitude);
-  }
-
-  CameraFit? _getInitialCameraFit(List<TrackPoint> points) {
-    if (!widget.showFullRide) return null;
-
-    return CameraFit.bounds(
-      bounds: _fullTrackBounds(widget.points),
-      padding: EdgeInsets.all(40),
-    );
-  }
-
   LatLngBounds _fullTrackBounds(List<TrackPoint> points) {
     final List<double> lats = points.map((p) => p.latitude).toList();
     final List<double> longs = points.map((p) => p.longitude).toList();
@@ -80,6 +63,23 @@ class _RideMapState extends State<RideMap> {
     return LatLngBounds(
       LatLng(lats.reduce(min), longs.reduce(min)),
       LatLng(lats.reduce(max), longs.reduce(max)),
+    );
+  }
+
+  LatLng _getInitialMapCenter(List<TrackPoint> points) {
+    if (points.isEmpty) return LatLng(0.0, 0.0);
+
+    if (widget.showFullRide) return _averageCenterPoint(widget.points);
+
+    return LatLng(points[0].latitude, points[0].longitude);
+  }
+
+  CameraFit? _getInitialCameraFit(List<TrackPoint> points) {
+    if (!widget.showFullRide) return null;
+
+    return CameraFit.bounds(
+      bounds: _fullTrackBounds(widget.points),
+      padding: EdgeInsets.all(40),
     );
   }
 
