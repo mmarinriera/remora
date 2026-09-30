@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'dart:math';
 
 const num defaultCameraOffset = 50;
+const double defaultCameraZoom = 17;
 
 class RideMap extends StatefulWidget {
   final List<TrackPoint> points;
@@ -38,6 +39,23 @@ class _RideMapState extends State<RideMap> {
       sumLong += point.longitude;
     }
     return LatLng(sumLat / points.length, sumLong / points.length);
+  }
+
+  LatLng _getInitialMapCenter(List<TrackPoint> points) {
+    if (points.isEmpty) return LatLng(0.0, 0.0);
+
+    if (widget.showFullRide) return _averageCenterPoint(widget.points);
+
+    return LatLng(points[0].latitude, points[0].longitude);
+  }
+
+  CameraFit? _getInitialCameraFit(List<TrackPoint> points) {
+    if (!widget.showFullRide) return null;
+
+    return CameraFit.bounds(
+      bounds: _fullTrackBounds(widget.points),
+      padding: EdgeInsets.all(40),
+    );
   }
 
   LatLngBounds _fullTrackBounds(List<TrackPoint> points) {
@@ -74,17 +92,17 @@ class _RideMapState extends State<RideMap> {
       ),
     ];
 
-    final LatLng initialMapCenter;
+    final LatLng initialMapCenter = _getInitialMapCenter(widget.points);
 
-    if (widget.points.isEmpty) {
-      initialMapCenter = LatLng(0.0, 0.0);
-    } else if (widget.points.length == 1) {
-      initialMapCenter = LatLng(
-        widget.points[0].latitude,
-        widget.points[0].longitude,
+    final CameraFit? initialCameraFit = _getInitialCameraFit(widget.points);
+
+    final TrackPoint? currentPosition = widget.currentPosition;
+
+    if (_mapReady && currentPosition != null) {
+      _mapController.move(
+        LatLng(currentPosition.latitude, currentPosition.longitude),
+        defaultCameraZoom,
       );
-    } else {
-      initialMapCenter = _averageCenterPoint(widget.points);
     }
 
     if (widget.points.length > 1) {
@@ -102,34 +120,12 @@ class _RideMapState extends State<RideMap> {
       );
     }
 
-    final Distance distance = const Distance();
-    final LatLngBounds cameraBounds = widget.points.length > 1
-        ? _fullTrackBounds(widget.points)
-        : LatLngBounds(
-            distance.offset(initialMapCenter, defaultCameraOffset, 315),
-            distance.offset(initialMapCenter, defaultCameraOffset, 135),
-          );
-
-    print('map center $initialMapCenter /\n bounds $cameraBounds');
-
-    final TrackPoint? currentPosition = widget.currentPosition;
-
-    if (_mapReady && currentPosition != null) {
-      _mapController.move(
-        LatLng(currentPosition.latitude, currentPosition.longitude),
-        _mapController.camera.zoom,
-      );
-    }
-
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
         initialCenter: initialMapCenter,
-        initialZoom: 13,
-        initialCameraFit: CameraFit.bounds(
-          bounds: cameraBounds,
-          padding: EdgeInsets.all(40),
-        ),
+        initialZoom: defaultCameraZoom,
+        initialCameraFit: initialCameraFit,
         onMapReady: () {
           _mapReady = true;
         },
