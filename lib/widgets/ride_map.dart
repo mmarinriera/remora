@@ -7,11 +7,25 @@ import 'dart:math';
 
 const num defaultCameraOffset = 50;
 
-class RideMap extends StatelessWidget {
-  final List<TrackPoint> _points;
-  final TrackPoint? _centerPoint;
+class RideMap extends StatefulWidget {
+  final List<TrackPoint> points;
+  final TrackPoint? currentPosition;
+  final bool showFullRide;
 
-  const RideMap({super.key, required this._points, this._centerPoint});
+  const RideMap({
+    super.key,
+    required this.points,
+    this.currentPosition,
+    this.showFullRide = false,
+  });
+
+  @override
+  State<RideMap> createState() => _RideMapState();
+}
+
+class _RideMapState extends State<RideMap> {
+  final _mapController = MapController();
+  bool _mapReady = false;
 
   LatLng _averageCenterPoint(List<TrackPoint> points) {
     if (points.isEmpty) {
@@ -26,7 +40,7 @@ class RideMap extends StatelessWidget {
     return LatLng(sumLat / points.length, sumLong / points.length);
   }
 
-  LatLngBounds _trackBounds(List<TrackPoint> points) {
+  LatLngBounds _fullTrackBounds(List<TrackPoint> points) {
     final List<double> lats = points.map((p) => p.latitude).toList();
     final List<double> longs = points.map((p) => p.longitude).toList();
 
@@ -60,12 +74,25 @@ class RideMap extends StatelessWidget {
       ),
     ];
 
-    if (_points.length > 1) {
+    final LatLng initialMapCenter;
+
+    if (widget.points.isEmpty) {
+      initialMapCenter = LatLng(0.0, 0.0);
+    } else if (widget.points.length == 1) {
+      initialMapCenter = LatLng(
+        widget.points[0].latitude,
+        widget.points[0].longitude,
+      );
+    } else {
+      initialMapCenter = _averageCenterPoint(widget.points);
+    }
+
+    if (widget.points.length > 1) {
       layers.add(
         PolylineLayer(
           polylines: [
             Polyline(
-              points: _points
+              points: widget.points
                   .map((p) => LatLng(p.latitude, p.longitude))
                   .toList(),
               strokeWidth: 4,
@@ -75,28 +102,37 @@ class RideMap extends StatelessWidget {
       );
     }
 
-    final LatLng mapCenter = _centerPoint == null
-        ? _averageCenterPoint(_points)
-        : LatLng(_centerPoint.latitude, _centerPoint.longitude);
-
     final Distance distance = const Distance();
-    final LatLngBounds cameraBounds = _centerPoint == null
-        ? _trackBounds(_points)
+    final LatLngBounds cameraBounds = widget.points.length > 1
+        ? _fullTrackBounds(widget.points)
         : LatLngBounds(
-            distance.offset(mapCenter, defaultCameraOffset, 315),
-            distance.offset(mapCenter, defaultCameraOffset, 135),
+            distance.offset(initialMapCenter, defaultCameraOffset, 315),
+            distance.offset(initialMapCenter, defaultCameraOffset, 135),
           );
 
-    print('map center $mapCenter /\n bounds $cameraBounds \n $_centerPoint');
+    print('map center $initialMapCenter /\n bounds $cameraBounds');
+
+    final TrackPoint? currentPosition = widget.currentPosition;
+
+    if (_mapReady && currentPosition != null) {
+      _mapController.move(
+        LatLng(currentPosition.latitude, currentPosition.longitude),
+        _mapController.camera.zoom,
+      );
+    }
 
     return FlutterMap(
+      mapController: _mapController,
       options: MapOptions(
-        initialCenter: mapCenter,
+        initialCenter: initialMapCenter,
         initialZoom: 13,
         initialCameraFit: CameraFit.bounds(
           bounds: cameraBounds,
           padding: EdgeInsets.all(40),
         ),
+        onMapReady: () {
+          _mapReady = true;
+        },
       ),
       children: layers,
     );

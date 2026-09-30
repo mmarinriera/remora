@@ -12,9 +12,6 @@ class ActiveRideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DateTime? rideStart = context.watch<RideTracker>().currentRideStart;
-    final TrackPoint? currentPosition = context
-        .watch<RideTracker>()
-        .currentPosition;
 
     final double? currentDistance = context
         .watch<RideTracker>()
@@ -38,7 +35,10 @@ class ActiveRideScreen extends StatelessWidget {
           Text('Total distance: ${currentDistance ?? '-'}'),
           SizedBox(
             height: 300,
-            child: RideMap(points: trackPoints, centerPoint: currentPosition),
+            child: RideMap(
+              points: trackPoints,
+              currentPosition: trackPoints.lastOrNull,
+            ),
           ),
         ],
       ),

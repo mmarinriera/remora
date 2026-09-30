@@ -30,7 +30,10 @@ class RideDetailsScreen extends StatelessWidget {
             'Ride duration: ${duration != null ? formatDuration(duration) : '-'}',
           ),
           Text('Total distance: ${ride.totalDistance ?? '-'}'),
-          SizedBox(height: 300, child: RideMap(points: points)),
+          SizedBox(
+            height: 300,
+            child: RideMap(points: points, showFullRide: true),
+          ),
         ],
       ),
     );
