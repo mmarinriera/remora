@@ -33,6 +33,8 @@ class RidesScreen extends StatelessWidget {
                 ride.id,
               );
 
+              if (!context.mounted) return;
+
               Navigator.push(
                 context,
                 MaterialPageRoute<void>(
@@ -51,7 +53,9 @@ class RidesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await context.read<RideTracker>().startTrack();
+
           if (!context.mounted) return;
+
           Navigator.push(
             context,
             MaterialPageRoute<void>(
