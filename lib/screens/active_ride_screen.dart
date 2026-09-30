@@ -11,15 +11,11 @@ class ActiveRideScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateTime? rideStart = context.watch<RideTracker>().currentRideStart;
+    final rideTracker = context.watch<RideTracker>();
 
-    final double? currentDistance = context
-        .watch<RideTracker>()
-        .currentRideDistance;
-
-    final List<TrackPoint> trackPoints = context
-        .watch<RideTracker>()
-        .currentRidePoints;
+    final DateTime? rideStart = rideTracker.currentRideStart;
+    final double? currentDistance = rideTracker.currentRideDistance;
+    final List<TrackPoint> trackPoints = rideTracker.currentRidePoints;
 
     final String rideStartFmt = rideStart != null ? formatDate(rideStart) : '-';
 
