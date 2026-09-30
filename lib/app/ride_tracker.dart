@@ -27,7 +27,8 @@ class RideTracker extends ChangeNotifier {
   DateTime? get currentRideStart => _currentRideStart;
   double? get currentRideDistance => _currentRideDistance;
   TrackPoint? get currentPosition => _currentPosition;
-  List<TrackPoint> get currentRidePoints => _currentRidePoints;
+  List<TrackPoint> get currentRidePoints =>
+      List.unmodifiable(_currentRidePoints);
 
   bool get trackActive => _trackActive;
 
