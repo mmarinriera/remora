@@ -53,7 +53,6 @@ class RideTracker extends ChangeNotifier {
     _currentRideDistance = 0.0;
 
     await _repository.createRide(ride);
-    notifyListeners();
 
     _locationSubscription = _locationService.positionStream.listen((
       point,
@@ -62,6 +61,8 @@ class RideTracker extends ChangeNotifier {
       await _handleTrackPoint(point);
       notifyListeners();
     });
+
+    notifyListeners();
   }
 
   Future<void> stopTrack() async {
