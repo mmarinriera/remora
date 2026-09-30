@@ -1,11 +1,13 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:remora/models/track_point.dart';
 
+const minDistance = 1;
+
 class LocationService {
   Stream<TrackPoint> get positionStream {
     final settings = AndroidSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 5,
+      distanceFilter: minDistance,
       foregroundNotificationConfig: ForegroundNotificationConfig(
         notificationTitle: 'Ride tracking',
         notificationText: 'Your ride is being recorded',
