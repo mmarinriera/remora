@@ -27,6 +27,11 @@ class RideMap extends StatefulWidget {
 class _RideMapState extends State<RideMap> {
   final _mapController = MapController();
   bool _mapReady = false;
+  bool _activeTracking = true;
+
+  void _disableActiveTracking() {
+    _activeTracking = false;
+  }
 
   LatLng _averageCenterPoint(List<TrackPoint> points) {
     if (points.isEmpty) {
@@ -66,19 +71,37 @@ class _RideMapState extends State<RideMap> {
     );
   }
 
-  LatLng _getInitialMapCenter(List<TrackPoint> points) {
+  LatLng _getMapCenter(List<TrackPoint> points) {
     if (points.isEmpty) return LatLng(0.0, 0.0);
 
     if (widget.showFullRide) return _averageCenterPoint(widget.points);
 
-    return LatLng(points[0].latitude, points[0].longitude);
+    return LatLng(points.last.latitude, points.last.longitude);
   }
 
-  CameraFit? _getInitialCameraFit(List<TrackPoint> points) {
-    if (!widget.showFullRide) return null;
+  CameraFit _getCameraFit(List<TrackPoint> points) {
+    final List<LatLng> pointsLatLng = points
+        .map((p) => LatLng(p.latitude, p.longitude))
+        .toList();
+
+    if (points.length > 1) {
+      return CameraFit.coordinates(
+        coordinates: pointsLatLng,
+        padding: EdgeInsets.all(40),
+      );
+    }
+
+    final LatLng centerPoint = pointsLatLng.isEmpty
+        ? LatLng(0.0, 0.0)
+        : pointsLatLng.last;
+
+    final Distance distance = const Distance();
 
     return CameraFit.bounds(
-      bounds: _fullTrackBounds(widget.points),
+      bounds: LatLngBounds(
+        distance.offset(centerPoint, defaultCameraOffset, 315),
+        distance.offset(centerPoint, defaultCameraOffset, 135),
+      ),
       padding: EdgeInsets.all(40),
     );
   }
@@ -92,13 +115,9 @@ class _RideMapState extends State<RideMap> {
       ),
     ];
 
-    final LatLng initialMapCenter = _getInitialMapCenter(widget.points);
-
-    final CameraFit? initialCameraFit = _getInitialCameraFit(widget.points);
-
     final TrackPoint? currentPosition = widget.currentPosition;
 
-    if (_mapReady && currentPosition != null) {
+    if (_mapReady && currentPosition != null && _activeTracking) {
       _mapController.move(
         LatLng(currentPosition.latitude, currentPosition.longitude),
         defaultCameraZoom,
@@ -123,11 +142,18 @@ class _RideMapState extends State<RideMap> {
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
-        initialCenter: initialMapCenter,
+        initialCenter: _getMapCenter(widget.points),
         initialZoom: defaultCameraZoom,
-        initialCameraFit: initialCameraFit,
+        initialCameraFit: widget.showFullRide && widget.points.isNotEmpty
+            ? _getCameraFit(widget.points)
+            : null,
         onMapReady: () {
           _mapReady = true;
+        },
+        onPositionChanged: (camera, hasGesture) {
+          if (hasGesture) {
+            _disableActiveTracking();
+          }
         },
       ),
       children: layers,
