@@ -40,7 +40,8 @@ class ActiveRideScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text('Finish track'),
         onPressed: () async {
           await context.read<RideTracker>().stopTrack();
           if (!context.mounted) return;
@@ -49,7 +50,7 @@ class ActiveRideScreen extends StatelessWidget {
         // foregroundColor: customizations[index].$1,
         // backgroundColor: customizations[index].$2,
         // shape: customizations[index].$3,
-        child: const Icon(Icons.stop),
+        icon: const Icon(Icons.stop),
       ),
     );
   }

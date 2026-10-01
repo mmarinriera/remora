@@ -11,7 +11,8 @@ class RidesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rides = context.watch<RideTracker>().pastRides;
+    final RideTracker rideTracker = context.watch<RideTracker>();
+    final rides = rideTracker.pastRides;
 
     return Scaffold(
       appBar: AppBar(
@@ -53,7 +54,10 @@ class RidesScreen extends StatelessWidget {
         },
         separatorBuilder: (context, index) => const Divider(),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
+        label: !rideTracker.trackActive
+            ? Text('Start track')
+            : Text('Back to track'),
         onPressed: () async {
           await context.read<RideTracker>().startTrack();
 
@@ -67,7 +71,7 @@ class RidesScreen extends StatelessWidget {
         // foregroundColor: customizations[index].$1,
         // backgroundColor: customizations[index].$2,
         // shape: customizations[index].$3,
-        child: const Icon(Icons.navigation),
+        icon: const Icon(Icons.navigation),
       ),
     );
   }
