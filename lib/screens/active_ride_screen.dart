@@ -6,8 +6,7 @@ import 'package:remora/widgets/ride_map.dart';
 import 'package:provider/provider.dart';
 
 class ActiveRideScreen extends StatelessWidget {
-  final String title;
-  const ActiveRideScreen({super.key, required this.title});
+  const ActiveRideScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +16,16 @@ class ActiveRideScreen extends StatelessWidget {
     final double? currentDistance = rideTracker.currentRideDistance;
     final List<TrackPoint> trackPoints = rideTracker.currentRidePoints;
 
-    final String rideStartFmt = rideStart != null ? formatDate(rideStart) : '-';
+    final String rideStartFmt = rideStart != null ? formatTime(rideStart) : '-';
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
+        title: Text('Currently tracking...'),
       ),
       body: Column(
         children: [
-          Text('Ride started on: $rideStartFmt'),
+          Text('Start time: $rideStartFmt'),
           Text('Ride duration: #TODO'),
           Text('Total distance: ${currentDistance ?? '-'}'),
           SizedBox(

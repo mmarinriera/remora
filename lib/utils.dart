@@ -1,7 +1,11 @@
 import 'package:intl/intl.dart';
 
 String formatDate(DateTime date) {
-  return DateFormat.yMMMEd().add_jm().format(date);
+  return DateFormat('yMMMEd').format(date);
+}
+
+String formatTime(DateTime date) {
+  return DateFormat.jm().format(date);
 }
 
 String formatDuration(Duration duration) {

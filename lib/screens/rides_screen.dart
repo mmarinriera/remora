@@ -25,8 +25,9 @@ class RidesScreen extends StatelessWidget {
           final ride = rides[index];
           final Duration? duration = ride.duration;
           return ListTile(
-            title: Text(
-              'Start: ${formatDate(ride.startedAt)}\nDuration: ${duration != null ? formatDuration(duration) : '-'}\nDistance: ${ride.totalDistance ?? '-'}',
+            title: Text(formatDate(ride.startedAt)),
+            subtitle: Text(
+              'Duration: ${duration != null ? formatDuration(duration) : '-'} / Distance: ${ride.totalDistance ?? '-'}',
             ),
             onTap: () async {
               final points = await context.read<RideTracker>().getTrackPoints(
@@ -38,11 +39,8 @@ class RidesScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute<void>(
-                  builder: (context) => RideDetailsScreen(
-                    title: ride.id,
-                    ride: ride,
-                    points: points,
-                  ),
+                  builder: (context) =>
+                      RideDetailsScreen(ride: ride, points: points),
                 ),
               );
             },
@@ -58,9 +56,7 @@ class RidesScreen extends StatelessWidget {
 
           Navigator.push(
             context,
-            MaterialPageRoute<void>(
-              builder: (context) => ActiveRideScreen(title: "Ride"),
-            ),
+            MaterialPageRoute<void>(builder: (context) => ActiveRideScreen()),
           );
         },
         // foregroundColor: customizations[index].$1,
