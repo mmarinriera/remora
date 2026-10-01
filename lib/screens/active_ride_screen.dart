@@ -17,6 +17,9 @@ class ActiveRideScreen extends StatelessWidget {
     final List<TrackPoint> trackPoints = rideTracker.currentRidePoints;
 
     final String rideStartFmt = rideStart != null ? formatTime(rideStart) : '-';
+    final String rideDistanceFmt = currentDistance != null
+        ? '${currentDistance.toStringAsFixed(2)}m'
+        : '-';
 
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +30,7 @@ class ActiveRideScreen extends StatelessWidget {
         children: [
           Text('Start time: $rideStartFmt'),
           Text('Ride duration: #TODO'),
-          Text('Total distance: ${currentDistance ?? '-'}'),
+          Text('Total distance: $rideDistanceFmt'),
           SizedBox(
             height: 300,
             child: RideMap(

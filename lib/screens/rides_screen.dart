@@ -24,11 +24,16 @@ class RidesScreen extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           final ride = rides[index];
           final Duration? duration = ride.duration;
+          final String durationFmt = duration != null
+              ? formatDuration(duration)
+              : '-';
+          final double? distance = ride.totalDistance;
+          final String distanceFmt = distance != null
+              ? '${distance.toStringAsFixed(2)}m'
+              : '-';
           return ListTile(
             title: Text(formatDate(ride.startedAt)),
-            subtitle: Text(
-              'Duration: ${duration != null ? formatDuration(duration) : '-'} / Distance: ${ride.totalDistance ?? '-'}',
-            ),
+            subtitle: Text('Duration: $durationFmt\nDistance: $distanceFmt'),
             onTap: () async {
               final points = await context.read<RideTracker>().getTrackPoints(
                 ride.id,

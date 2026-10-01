@@ -16,6 +16,14 @@ class RideDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Duration? duration = ride.duration;
+    final String durationFmt = duration != null
+        ? formatDuration(duration)
+        : '-';
+    final double? distance = ride.totalDistance;
+    final String distanceFmt = distance != null
+        ? '${distance.toStringAsFixed(2)}m'
+        : '-';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -24,10 +32,8 @@ class RideDetailsScreen extends StatelessWidget {
       body: Column(
         children: [
           Text('Start time: ${formatTime(ride.startedAt)}'),
-          Text(
-            'Ride duration: ${duration != null ? formatDuration(duration) : '-'}',
-          ),
-          Text('Total distance: ${ride.totalDistance ?? '-'}'),
+          Text('Ride duration: $durationFmt'),
+          Text('Total distance: $distanceFmt'),
           SizedBox(
             height: 300,
             child: RideMap(points: points, showFullRide: true),
