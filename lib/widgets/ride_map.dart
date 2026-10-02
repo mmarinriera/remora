@@ -46,31 +46,6 @@ class _RideMapState extends State<RideMap> {
     return LatLng(sumLat / points.length, sumLong / points.length);
   }
 
-  LatLngBounds _fullTrackBounds(List<TrackPoint> points) {
-    final List<double> lats = points.map((p) => p.latitude).toList();
-    final List<double> longs = points.map((p) => p.longitude).toList();
-
-    if (points.isEmpty) {
-      final Distance distance = const Distance();
-      return LatLngBounds(
-        distance.offset(LatLng(0.0, 0.0), defaultCameraOffset, 315),
-        distance.offset(LatLng(0.0, 0.0), defaultCameraOffset, 135),
-      );
-    }
-
-    if (points.length == 1) {
-      final Distance distance = const Distance();
-      return LatLngBounds(
-        distance.offset(LatLng(lats[0], longs[0]), defaultCameraOffset, 315),
-        distance.offset(LatLng(lats[0], longs[0]), defaultCameraOffset, 135),
-      );
-    }
-    return LatLngBounds(
-      LatLng(lats.reduce(min), longs.reduce(min)),
-      LatLng(lats.reduce(max), longs.reduce(max)),
-    );
-  }
-
   LatLng _getMapCenter(List<TrackPoint> points) {
     if (points.isEmpty) return LatLng(0.0, 0.0);
 
@@ -84,7 +59,7 @@ class _RideMapState extends State<RideMap> {
         .map((p) => LatLng(p.latitude, p.longitude))
         .toList();
 
-    if (points.length > 1) {
+    if (pointsLatLng.length > 1) {
       return CameraFit.coordinates(
         coordinates: pointsLatLng,
         padding: EdgeInsets.all(40),
@@ -139,24 +114,48 @@ class _RideMapState extends State<RideMap> {
       );
     }
 
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: _getMapCenter(widget.points),
-        initialZoom: defaultCameraZoom,
-        initialCameraFit: widget.showFullRide && widget.points.isNotEmpty
-            ? _getCameraFit(widget.points)
-            : null,
-        onMapReady: () {
-          _mapReady = true;
-        },
-        onPositionChanged: (camera, hasGesture) {
-          if (hasGesture) {
-            _disableActiveTracking();
-          }
-        },
-      ),
-      children: layers,
+    return Stack(
+      children: [
+        FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            initialCenter: _getMapCenter(widget.points),
+            initialZoom: defaultCameraZoom,
+            initialCameraFit: widget.showFullRide
+                ? _getCameraFit(widget.points)
+                : null,
+            onMapReady: () {
+              _mapReady = true;
+            },
+            onPositionChanged: (camera, hasGesture) {
+              if (hasGesture) {
+                _disableActiveTracking();
+              }
+            },
+          ),
+          children: layers,
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: FloatingActionButton(
+            child: Icon(Icons.add),
+            onPressed: () {
+              if (!_mapReady) return;
+
+              final LatLng mapCenter = _getMapCenter(widget.points);
+
+              if (currentPosition != null) {
+                _mapController.move(mapCenter, defaultCameraZoom);
+                _activeTracking = true;
+              }
+              if (widget.showFullRide) {
+                _mapController.fitCamera(_getCameraFit(widget.points));
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }
